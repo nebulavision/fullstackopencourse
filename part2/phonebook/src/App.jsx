@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Filter = ({ handleNewFilter }) => (
   <div>
@@ -39,64 +40,58 @@ const Persons = ({ persons }) => (
 );
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456", id: 1 },
-    { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
-    { name: "Dan Abramov", number: "12-43-234345", id: 3 },
-    { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
-  const [filteredPersons, setFilteredPersons] = useState(persons);
+  const [filterQuery, setFilterQuery] = useState("");
 
-  const handleNewName = (event) => {
-    setNewName(event.target.value);
-  };
-
-  const handleNewNumber = (event) => {
-    setNewNumber(event.target.value);
-  };
+  useEffect(() => {
+    axios.get("http://localhost:3001/persons").then((response) => {
+      setPersons(response.data);
+    });
+  }, []);
 
   const handleClick = (event) => {
     event.preventDefault();
+
+    if (!newName || !newNumber) {
+      alert("Please fill in both name and number");
+      return;
+    }
+
+    if (persons.find((p) => p.name === newName)) {
+      alert(`${newName} is already added to phonebook`);
+      return;
+    }
+
     const newPerson = {
       name: newName,
       number: newNumber,
       id: persons.length + 1,
     };
 
-    if (persons.find((p) => p.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
-    } else {
-      if (persons.length === filteredPersons.length) {
-        setFilteredPersons(filteredPersons.concat(newPerson));
-      }
-
-      setPersons(persons.concat(newPerson));
-    }
-
+    setPersons(persons.concat(newPerson));
     setNewName("");
+    setNewNumber("");
   };
 
-  const handleNewFilter = (event) => {
-    const newFilter = event.target.value;
-    const filteredPersons = persons.filter((p) =>
-      p.name.toLowerCase().includes(newFilter.toLowerCase())
-    );
-    setFilteredPersons(filteredPersons ? filteredPersons : persons);
-  };
+  const filteredPersons = persons.filter((person) =>
+    person.name.toLowerCase().includes(filterQuery.toLowerCase())
+  );
+
+  if(filteredPersons.length === 0) filteredPersons.push({id:0, name:"No matches found", number:""});
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter handleNewFilter={handleNewFilter} />
+      <Filter handleNewFilter={(e) => setFilterQuery(e.target.value)} />
       <br />
       <br />
       <h3>Add a new</h3>
       <PersonForm
         handleClick={handleClick}
-        handleNewName={handleNewName}
-        handleNewNumber={handleNewNumber}
+        handleNewName={(e) => setNewName(e.target.value)}
+        handleNewNumber={(e) => setNewNumber(e.target.value)}
         newName={newName}
         newNumber={newNumber}
       />
