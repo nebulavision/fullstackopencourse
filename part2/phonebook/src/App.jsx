@@ -30,15 +30,6 @@ const PersonForm = ({
 );
 
 const Persons = ({ persons, onDelete }) => {
-  const handleDeleteClick = (noteId) => {
-    const numberToDelete = persons.find((p) => p.id === noteId);
-    if (!window.confirm(`Are you sure you want to delete ${numberToDelete.name}?`)) return;
-
-    noteService.deleteNumber(noteId).then(() => {
-      onDelete(noteId);
-    });
-  };
-
   return (
     <div>
       {persons.map((person) => (
@@ -46,7 +37,7 @@ const Persons = ({ persons, onDelete }) => {
           <p style={{ display: "inline", marginRight: "10px" }}>
             {person.name} {person.number}
           </p>
-          <button onClick={() => handleDeleteClick(person.id)}>Delete</button>
+          <button onClick={() => onDelete(person.id)}>Delete</button>
         </div>
       ))}
     </div>
@@ -65,9 +56,15 @@ const App = () => {
     });
   }, []);
 
-  const handleOnDelete = (noteId) => {
-    setPersons(persons.filter((person) => person.id !== noteId));
-  }
+  const handleDeleteClick = (noteId) => {
+    const numberToDelete = persons.find((p) => p.id === noteId);
+    console.log(noteId);
+    if (!window.confirm(`Are you sure you want to delete ${numberToDelete.name}?`)) return;
+
+    noteService.deleteNumber(noteId).then(() => {
+      setPersons(persons.filter((p) => p.id !== noteId));
+      });
+  };
 
   const handleClick = (event) => {
     event.preventDefault();
@@ -78,14 +75,28 @@ const App = () => {
     }
 
     if (persons.find((p) => p.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
+      if(!window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) return;
+      const personToUpdate = persons.find((p) => p.name === newName);
+      const updatedPerson = { ...personToUpdate, number: newNumber };
+
+      noteService.updateNumber(personToUpdate.id, updatedPerson).then(returnedPerson => {
+        setPersons(
+          persons.map((p) => (p.id !== personToUpdate.id ? p : returnedPerson))
+        );
+        setNewName("");
+        setNewNumber("");
+      }).catch(() => {
+        alert(`Information of ${newName} has already been removed from server`);
+        setPersons(persons.filter(p => p.id !== personToUpdate.id));
+      }); 
+      
       return;
     }
 
     const newPerson = {
       name: newName,
       number: newNumber,
-      id: `${persons.length + 1}`,
+      id: `${persons.reduce((maxId, person) => Math.max(maxId, person.id), 0) + 1}`
     };
 
     noteService.insertNumber(newPerson).then((insertedNumber) => {
@@ -118,7 +129,7 @@ const App = () => {
       />
       <br />
       <h3>Numbers</h3>
-      <Persons persons={filteredPersons} onDelete={(noteId) => handleOnDelete(noteId)}/>
+      <Persons persons={filteredPersons} onDelete={(noteId) => handleDeleteClick(noteId)}/>
     </div>
   );
 };

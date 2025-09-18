@@ -15,10 +15,16 @@ const insertNumber = (number) => {
       
 };
 
+const updateNumber = (id, newNumber) => {
+  return axios
+    .put(`${REST_URL}/${id}`, newNumber)
+    .then((response) => response.data);
+};
+
 const deleteNumber = (id) => {
   return axios
     .delete(`${REST_URL}/${id}`)
     .then((response) => response.data);
 };
 
-export default { getAll, insertNumber, deleteNumber };
+export default { getAll, insertNumber, updateNumber, deleteNumber };
