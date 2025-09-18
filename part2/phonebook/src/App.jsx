@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import noteService from "./services/noteService";
 
 const Filter = ({ handleNewFilter }) => (
   <div>
@@ -29,15 +29,29 @@ const PersonForm = ({
   </form>
 );
 
-const Persons = ({ persons }) => (
-  <div>
-    {persons.map((person) => (
-      <p key={person.id}>
-        {person.name} {person.number}
-      </p>
-    ))}
-  </div>
-);
+const Persons = ({ persons, onDelete }) => {
+  const handleDeleteClick = (noteId) => {
+    const numberToDelete = persons.find((p) => p.id === noteId);
+    if (!window.confirm(`Are you sure you want to delete ${numberToDelete.name}?`)) return;
+
+    noteService.deleteNumber(noteId).then(() => {
+      onDelete(noteId);
+    });
+  };
+
+  return (
+    <div>
+      {persons.map((person) => (
+        <div key={person.id}>
+          <p style={{ display: "inline", marginRight: "10px" }}>
+            {person.name} {person.number}
+          </p>
+          <button onClick={() => handleDeleteClick(person.id)}>Delete</button>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -46,10 +60,14 @@ const App = () => {
   const [filterQuery, setFilterQuery] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
+    noteService.getAll().then((notes) => {
+      setPersons(notes);
     });
   }, []);
+
+  const handleOnDelete = (noteId) => {
+    setPersons(persons.filter((person) => person.id !== noteId));
+  }
 
   const handleClick = (event) => {
     event.preventDefault();
@@ -67,19 +85,22 @@ const App = () => {
     const newPerson = {
       name: newName,
       number: newNumber,
-      id: persons.length + 1,
+      id: `${persons.length + 1}`,
     };
 
-    setPersons(persons.concat(newPerson));
-    setNewName("");
-    setNewNumber("");
+    noteService.insertNumber(newPerson).then((insertedNumber) => {
+      setPersons(persons.concat(insertedNumber));
+      setNewName("");
+      setNewNumber("");
+    });
   };
 
   const filteredPersons = persons.filter((person) =>
     person.name.toLowerCase().includes(filterQuery.toLowerCase())
   );
 
-  if(filteredPersons.length === 0) filteredPersons.push({id:0, name:"No matches found", number:""});
+  if (filteredPersons.length === 0)
+    filteredPersons.push({ id: 0, name: "No matches found", number: "" });
 
   return (
     <div>
@@ -97,7 +118,7 @@ const App = () => {
       />
       <br />
       <h3>Numbers</h3>
-      <Persons persons={filteredPersons} />
+      <Persons persons={filteredPersons} onDelete={(noteId) => handleOnDelete(noteId)}/>
     </div>
   );
 };
