@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import noteService from "./services/noteService";
+import "./index.css";
 
 const Filter = ({ handleNewFilter }) => (
   <div>
@@ -44,11 +45,20 @@ const Persons = ({ persons, onDelete }) => {
   );
 };
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return <div className="error">{message}</div>;
+}
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterQuery, setFilterQuery] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null); 
 
   useEffect(() => {
     noteService.getAll().then((notes) => {
@@ -61,8 +71,13 @@ const App = () => {
     console.log(noteId);
     if (!window.confirm(`Are you sure you want to delete ${numberToDelete.name}?`)) return;
 
-    noteService.deleteNumber(noteId).then(() => {
+    noteService.deleteNumber(noteId).then((deletedNumber) => {
       setPersons(persons.filter((p) => p.id !== noteId));
+      setErrorMessage(
+        `Number '${deletedNumber.name}' was already removed from server` )
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
       });
   };
 
@@ -83,6 +98,7 @@ const App = () => {
         setPersons(
           persons.map((p) => (p.id !== personToUpdate.id ? p : returnedPerson))
         );
+        
         setNewName("");
         setNewNumber("");
       }).catch(() => {
@@ -101,6 +117,13 @@ const App = () => {
 
     noteService.insertNumber(newPerson).then((insertedNumber) => {
       setPersons(persons.concat(insertedNumber));
+
+      setErrorMessage(
+        `Number '${insertedNumber.name}' was created` )
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+
       setNewName("");
       setNewNumber("");
     });
@@ -119,6 +142,7 @@ const App = () => {
       <Filter handleNewFilter={(e) => setFilterQuery(e.target.value)} />
       <br />
       <br />
+      <Notification message={errorMessage} />
       <h3>Add a new</h3>
       <PersonForm
         handleClick={handleClick}

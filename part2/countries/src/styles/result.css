@@ -1,0 +1,20 @@
+.country-item {
+  margin-bottom: 0.5rem;
+  padding: 10px;
+}
+
+.country-item:hover {
+  background-color: #f0f0f0;
+  padding: 10px;;
+}
+
+.country-item button {
+  margin-left: 0.5rem;
+}
+
+.country-item button:hover {
+  cursor: pointer;
+}
+
+
+
