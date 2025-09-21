@@ -74,7 +74,7 @@ const App = () => {
     noteService.deleteNumber(noteId).then((deletedNumber) => {
       setPersons(persons.filter((p) => p.id !== noteId));
       setErrorMessage(
-        `Number '${deletedNumber.name}' was already removed from server` )
+        `Number '${numberToDelete.name}' was already removed from server` )
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)

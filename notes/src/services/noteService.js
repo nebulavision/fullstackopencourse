@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = '/api/v1/notes'
+const BASE_URL = 'https://fullstackopencourse-wlel.onrender.com/api/v1/notes'
 
 const getAll = () => {
   return axios.get(BASE_URL).then(res => res.data);

@@ -27,7 +27,7 @@ const App = () => {
         setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)));
       })
       .catch(() => {
-        setErrorMessage(`The note ${note.content} was allready deleted from server.`);
+        setErrorMessage(`The note ${note.content} was already deleted from server.`);
         setNotificationDisplayed(true);
 
         setTimeout(() => {

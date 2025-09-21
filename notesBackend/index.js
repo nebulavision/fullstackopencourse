@@ -29,6 +29,8 @@ const requestLogger = (request, response, next) => {
 
 const app = express();
 app.use(express.json());
+//Necesario para servir el index.html y index.js al desplegarlo
+app.use(express.static('dist')); 
 app.use(requestLogger);
 app.use(cors());
 
@@ -86,8 +88,7 @@ const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
-//Necesario para servir el index.html y index.js al desplegarlo
-app.use(express.static('dist')); 
+
 
 
 app.use(unknownEndpoint)

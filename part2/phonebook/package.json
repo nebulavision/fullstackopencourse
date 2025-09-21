@@ -11,6 +11,7 @@
     "all": "concurrently \"npm run dev\" \"json-server db.json --port 3001\""
   },
   "dependencies": {
+    "axios": "1.12.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
