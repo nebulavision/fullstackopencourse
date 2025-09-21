@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import path from 'path';
 
 const PORT = process.env.PORT || 3001;
 let notes = [
@@ -30,9 +31,7 @@ const requestLogger = (request, response, next) => {
 const app = express();
 app.use(express.json());
 app.use(requestLogger);
-app.use(cors);
-//Necesario para servir el index.html y index.js al desplegarlo
-app.use(express.static('dist')); 
+app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>');
@@ -89,5 +88,11 @@ const unknownEndpoint = (request, response) => {
 }
 
 app.use(unknownEndpoint)
+//Necesario para servir el index.html y index.js al desplegarlo
+app.use(express.static('dist')); 
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 app.listen(PORT,'0.0.0.0', () => console.log(`Server running on port:${PORT}`));
