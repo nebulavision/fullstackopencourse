@@ -87,12 +87,13 @@ const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
-app.use(unknownEndpoint)
 //Necesario para servir el index.html y index.js al desplegarlo
 app.use(express.static('dist')); 
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
+
+app.use(unknownEndpoint)
 
 app.listen(PORT,'0.0.0.0', () => console.log(`Server running on port:${PORT}`));
