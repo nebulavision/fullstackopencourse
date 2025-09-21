@@ -1,7 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 
-const PORT = process.env.port || 3001;
+const PORT = process.env.PORT || 3001;
 let notes = [
   { 
     "id": 1, 
