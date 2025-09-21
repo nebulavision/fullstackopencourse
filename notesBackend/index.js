@@ -1,6 +1,5 @@
 import cors from 'cors';
 import express from 'express';
-import path from 'path';
 
 const PORT = process.env.PORT || 3001;
 let notes = [
@@ -90,9 +89,6 @@ const unknownEndpoint = (request, response) => {
 //Necesario para servir el index.html y index.js al desplegarlo
 app.use(express.static('dist')); 
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
 
 app.use(unknownEndpoint)
 
