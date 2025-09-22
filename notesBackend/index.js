@@ -56,23 +56,15 @@ app.get('/api/v1/notes', (req, res) => {
 app.post('/api/v1/notes', (req, res) => {
   if(!req.body) return res.status(422).json({error: "The body is missing."});
 
-  const note = req.body;
+  const note = new Note({
+    content: req.body.content,
+    important: req.body.important
+  });
 
-  if('id' in note){
-    if(isNaN(note.id)) return res.status(400).json({error: "The id must be a number."}); 
+  note.save().then(savedNote => {
+    res.json(savedNote);
+  });
 
-    const isIdDuplicate = notes.find(n => n.id === note.id);
-
-    if(isIdDuplicate) return res.status(409).json({error: "A resoruce with the same id already exists."});
-  }else{
-    note.id = notes.length > 0 ? (Math.max(...notes.map(n => n.id)) + 1) : 1;
-  }
-
-  note.important = note.important ?? false;
-
-  notes = notes.concat(note);
-
-  res.json(note);
 });
 
 app.delete('/api/v1/notes/:id', (req, res) => {
