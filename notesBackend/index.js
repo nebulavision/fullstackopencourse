@@ -1,7 +1,9 @@
 import cors from 'cors';
 import express from 'express';
+import { PORT } from './config.js';
 
-const PORT = process.env.PORT || 3001;
+import { Note } from './models/note.js';
+
 let notes = [
   { 
     "id": 1, 
@@ -48,7 +50,7 @@ app.get('/api/v1/notes/:id', (req, res) => {
 });
 
 app.get('/api/v1/notes', (req, res) => {
-    res.json(notes);
+  Note.find({}).then(notes => res.json(notes));
 });
 
 app.post('/api/v1/notes', (req, res) => {
