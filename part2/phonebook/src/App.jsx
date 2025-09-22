@@ -97,7 +97,7 @@ const App = () => {
 
       noteService.updateNumber(personToUpdate.id, updatedPerson).then(returnedPerson => {
         setPersons(
-          persons.map((p) => (p.id !== personToUpdate.id ? p : returnedPerson))
+          persons.map((p) => (p.id !== returnedPerson.id ? p : returnedPerson)) 
         );
 
         setNewName("");
@@ -105,7 +105,6 @@ const App = () => {
       })
       .catch(error => {
         setErrorMessage(error.response.data.error)
-        setPersons(persons.filter(p => p.id !== personToUpdate.id));
       });
 
       return;
