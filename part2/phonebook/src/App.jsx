@@ -103,8 +103,8 @@ const App = () => {
         setNewName("");
         setNewNumber("");
       })
-      .catch(() => {
-        alert(`Information of ${newName} has already been removed from server`);
+      .catch(error => {
+        setErrorMessage(error.response.data.error)
         setPersons(persons.filter(p => p.id !== personToUpdate.id));
       });
 
@@ -128,7 +128,8 @@ const App = () => {
 
       setNewName("");
       setNewNumber("");
-    });
+    })
+    .catch(error => setErrorMessage(error.response.data.error));
   };
 
   const filteredPersons = persons.filter((person) =>
