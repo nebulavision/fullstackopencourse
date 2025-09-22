@@ -4,23 +4,6 @@ import { PORT } from './config.js';
 
 import { Note } from './models/note.js';
 
-let notes = [
-  { 
-    "id": 1, 
-    "content": "HTML is easy", 
-    "important": true },
-  {
-    "id": 2,
-    "content": "Browser can execute only JavaScript",
-    "important": false
-  },
-  {
-    "id": 3,
-    "content": "GET and POST are the most important methods of HTTP protocol",
-    "important": true
-  }
-]
-
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method);
   console.log('Path:', request.path);
@@ -40,17 +23,20 @@ app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>');
 });
 
-app.get('/api/v1/notes/:id', (req, res) => {
-    const note = notes.find(note => note.id === Number(req.params.id));
-
-    if(isNaN(req.params.id)) return res.status(400).json({error: "The id must be a number."});
-    if(!note) return res.status(404).json({error: 'Resource not found.'});
-    
-    res.json(note);
-});
-
 app.get('/api/v1/notes', (req, res) => {
   Note.find({}).then(notes => res.json(notes));
+});
+
+app.get('/api/v1/notes/:id', (req, res, next) => {
+  Note.findById(req.params.id)
+    .then(note => {
+      if (note) {
+        res.json(note);
+      } else {
+        res.status(404).json({error: 'Resource not found.'});
+      }
+    })
+    .catch(error => next(error));
 });
 
 app.post('/api/v1/notes', (req, res) => {
@@ -67,24 +53,49 @@ app.post('/api/v1/notes', (req, res) => {
 
 });
 
-app.delete('/api/v1/notes/:id', (req, res) => {
-    const noteIndex = notes.findIndex(note => note.id === Number(req.params.id));
+app.put('/api/v1/notes/:id', (req, res, next) => {
+  const body = req.body;
 
-    if(isNaN(req.params.id)) return res.status(400).json({error: "The id must be a number."});
-    if(noteIndex === -1) return res.status(404).json({error: 'Resource not found.'});
+  const note = {
+    content: body.content,
+    important: body.important
+  };
 
-    notes.splice(noteIndex, 1);
+  // {new: true} es para que en el param devuelto en la promesa
+  // en este caso updatedNote sea el objeto actualizado y no el original
+  Note.findByIdAndUpdate(req.params.id, note, { new: true })
+    .then(updatedNote => {
+      res.json(updatedNote);
+    })
+    .catch(error => next(error));
+});
 
-    res.status(204).end();
+app.delete('/api/v1/notes/:id', (req, res, next) => {
+  Note.findByIdAndDelete(req.params.id)
+    .then(result => {
+      res.status(204).end();
+    })
+    .catch(error => next(error));
 });
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
-}
+};
+
+const errorHandler = (error, req, res, next) => {
+  console.error('Error', error.message);
+
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'Malformatted id' });
+  } 
+
+  next(error);
+};
 
 
 
-
-app.use(unknownEndpoint)
+app.use(unknownEndpoint);
+// Este debe ser el último middleware cargado
+app.use(errorHandler); 
 
 app.listen(PORT,'0.0.0.0', () => console.log(`Server running on port:${PORT}`));

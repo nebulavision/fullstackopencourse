@@ -58,7 +58,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterQuery, setFilterQuery] = useState("");
-  const [errorMessage, setErrorMessage] = useState(null); 
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     noteService.getAll().then((notes) => {
@@ -71,7 +71,7 @@ const App = () => {
     console.log(noteId);
     if (!window.confirm(`Are you sure you want to delete ${numberToDelete.name}?`)) return;
 
-    noteService.deleteNumber(noteId).then((deletedNumber) => {
+    noteService.deleteNumber(noteId).then(() => {
       setPersons(persons.filter((p) => p.id !== noteId));
       setErrorMessage(
         `Number '${numberToDelete.name}' was already removed from server` )
@@ -91,6 +91,7 @@ const App = () => {
 
     if (persons.find((p) => p.name === newName)) {
       if(!window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) return;
+
       const personToUpdate = persons.find((p) => p.name === newName);
       const updatedPerson = { ...personToUpdate, number: newNumber };
 
@@ -98,14 +99,15 @@ const App = () => {
         setPersons(
           persons.map((p) => (p.id !== personToUpdate.id ? p : returnedPerson))
         );
-        
+
         setNewName("");
         setNewNumber("");
-      }).catch(() => {
+      })
+      .catch(() => {
         alert(`Information of ${newName} has already been removed from server`);
         setPersons(persons.filter(p => p.id !== personToUpdate.id));
-      }); 
-      
+      });
+
       return;
     }
 
