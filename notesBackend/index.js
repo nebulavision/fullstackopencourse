@@ -39,9 +39,7 @@ app.get('/api/v1/notes/:id', (req, res, next) => {
     .catch(error => next(error));
 });
 
-app.post('/api/v1/notes', (req, res) => {
-  if(!req.body) return res.status(422).json({error: "The body is missing."});
-
+app.post('/api/v1/notes', (req, res, next) => {
   const note = new Note({
     content: req.body.content,
     important: req.body.important
@@ -49,21 +47,21 @@ app.post('/api/v1/notes', (req, res) => {
 
   note.save().then(savedNote => {
     res.json(savedNote);
-  });
+  })
+  .catch(error => next(error));
 
 });
 
 app.put('/api/v1/notes/:id', (req, res, next) => {
-  const body = req.body;
-
-  const note = {
-    content: body.content,
-    important: body.important
-  };
+  const { content, important } = req.body
 
   // {new: true} es para que en el param devuelto en la promesa
   // en este caso updatedNote sea el objeto actualizado y no el original
-  Note.findByIdAndUpdate(req.params.id, note, { new: true })
+  Note.findByIdAndUpdate(
+    req.params.id, 
+    { content, important }, 
+    { new: true, runValidators: true, context: 'query' }
+  )
     .then(updatedNote => {
       res.json(updatedNote);
     })
@@ -86,8 +84,10 @@ const errorHandler = (error, req, res, next) => {
   console.error('Error', error.message);
 
   if (error.name === 'CastError') {
-    return res.status(400).send({ error: 'Malformatted id' });
-  } 
+    return res.status(400).json({ error: 'Malformatted id' });
+  } else if (error.name === 'ValidationError') {
+    return res.status(422).json({ error: error.message });
+  }
 
   next(error);
 };
