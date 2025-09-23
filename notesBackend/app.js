@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 import notesRouter from "./controller/notes.js";
 import logger from "./config/logger.js";
-import { MONGODB_URI } from "./config/config.js";
+import { MONGODB_URI } from "./config/dotenv.js";
 import middleware from "./utils/middleware.js";
 
 const app = express();
