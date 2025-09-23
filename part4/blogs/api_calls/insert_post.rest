@@ -1,0 +1,9 @@
+POST http://localhost:3003/api/v1/blogs
+Content-Type: application/json
+
+{
+      "title": "HTML desde Cero",
+      "author": "midudev",
+      "url": "https://midu.dev/curso/html-desde-cero",
+      "likes": 7541
+}
